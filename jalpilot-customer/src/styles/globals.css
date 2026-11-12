@@ -1,0 +1,16 @@
+@import "tailwindcss";
+
+:root {
+  --jp-primary: #0284c7;
+  --jp-secondary: #e0f2fe;
+  --jp-accent: #0369a1;
+  --jp-surface: #ffffff;
+  --jp-radius: 0.5rem;
+}
+
+@layer base {
+  body {
+    font-family: Inter, system-ui, -apple-system, sans-serif;
+  }
+}
+
