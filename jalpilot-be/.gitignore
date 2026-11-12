@@ -1,0 +1,35 @@
+# Binaries
+bin/
+*.exe
+*.dll
+*.so
+*.dylib
+jalpilot-api
+jalpilot-worker
+
+# Test & coverage
+*.test
+*.out
+coverage.txt
+coverage.html
+
+# Environment & Secrets
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+*.crt
+
+# Logs & Temp
+logs/
+*.log
+tmp/
+
+# IDE & OS
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
