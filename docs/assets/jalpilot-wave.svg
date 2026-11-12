@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 180" width="100%" height="180" role="img" aria-label="JalPilot Animated Water Wave Banner">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0369a1"/>
+      <stop offset="50%" stop-color="#0284c7"/>
+      <stop offset="100%" stop-color="#0ea5e9"/>
+    </linearGradient>
+    <linearGradient id="waveGrad1" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#e0f2fe" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.35"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="180" rx="16" fill="url(#bgGrad)"/>
+
+  <!-- Animated Wave 1 -->
+  <path fill="url(#waveGrad1)" d="M0,120 C200,160 400,80 600,120 C800,160 1000,80 1200,120 L1200,180 L0,180 Z">
+    <animate attributeName="d" dur="6s" repeatCount="indefinite"
+      values="M0,120 C200,160 400,80 600,120 C800,160 1000,80 1200,120 L1200,180 L0,180 Z;
+              M0,110 C250,75 450,155 650,110 C850,75 1050,155 1200,110 L1200,180 L0,180 Z;
+              M0,120 C200,160 400,80 600,120 C800,160 1000,80 1200,120 L1200,180 L0,180 Z"/>
+  </path>
+
+  <!-- Animated Wave 2 -->
+  <path fill="#ffffff" fill-opacity="0.16" d="M0,138 C300,100 500,170 800,130 C1000,105 1100,150 1200,135 L1200,180 L0,180 Z">
+    <animate attributeName="d" dur="8s" repeatCount="indefinite"
+      values="M0,138 C300,100 500,170 800,130 C1000,105 1100,150 1200,135 L1200,180 L0,180 Z;
+              M0,145 C250,175 550,95 850,140 C1020,165 1120,115 1200,145 L1200,180 L0,180 Z;
+              M0,138 C300,100 500,170 800,130 C1000,105 1100,150 1200,135 L1200,180 L0,180 Z"/>
+  </path>
+
+  <!-- Animated Water Droplet -->
+  <g transform="translate(88, 42)">
+    <path d="M30 4 C30 4 54 34 54 50 C54 63.25 43.25 74 30 74 C16.75 74 6 63.25 6 50 C6 34 30 4 30 4 Z" fill="#ffffff" fill-opacity="0.92">
+      <animateTransform attributeName="transform" type="translate" values="0,0; 0,-5; 0,0" dur="3s" repeatCount="indefinite"/>
+    </path>
+    <circle cx="23" cy="48" r="5" fill="#0284c7" fill-opacity="0.35">
+      <animateTransform attributeName="transform" type="translate" values="0,0; 0,-5; 0,0" dur="3s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+
+  <text x="168" y="82" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="42" font-weight="800" fill="#ffffff">JalPilot</text>
+  <text x="170" y="114" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="18" font-weight="500" fill="#e0f2fe">Smart Multi-Tenant Water Supply &amp; Jar Delivery SaaS Platform</text>
+</svg>
+
