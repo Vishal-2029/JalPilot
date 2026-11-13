@@ -17,7 +17,8 @@ import {
   Building,
   Award,
   CheckCircle2,
-  ChevronDown
+  ChevronDown,
+  Droplets,
 } from "lucide-react";
 
 /* ------------------------------------------------------------------------- */
@@ -96,33 +97,19 @@ const BUILTIN_THEMES: ThemePreset[] = [
 export function ThemesShowcasePage() {
   const [selectedTheme, setSelectedTheme] = useState<ThemePreset>(BUILTIN_THEMES[0]);
 
-  // Optionally fetch custom tenant themes from backend if available
-  const { data: serverThemes } = useQuery({
-    queryKey: ["public-themes"],
-    queryFn: async () => {
-      try {
-        const res = await apiClient.get("/public/themes");
-        return (res.data?.data as Array<{ id: string; theme_name: string; theme_slug: string; description: string; price: number }>) || [];
-      } catch {
-        return [];
-      }
-    },
-    staleTime: 60_000,
-  });
-
   return (
     <div className="space-y-16 py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
       {/* Hero */}
       <div className="text-center max-w-3xl mx-auto">
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-sky-100 px-3 py-1 text-xs font-semibold text-sky-800">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-sky-100 px-3.5 py-1 text-xs font-semibold text-sky-800">
           <Palette className="h-3.5 w-3.5 text-sky-600" />
-          No-Code Theme Engine
+          Full UI/UX Theme Engine
         </span>
         <h1 className="mt-4 text-4xl font-black text-slate-900 tracking-tight sm:text-5xl">
-          Customer Portal Themes
+          More Than Color: Complete UI/UX Transformations
         </h1>
         <p className="mt-4 text-lg text-slate-600 leading-relaxed">
-          Switch your customer portal look instantly without touching code or redeploying. Pick from 5 professionally designed palettes that match your drinking water brand.
+          Every theme completely redesigns the customer portal's layout, navigation bar, card shapes, typography, and button architecture to fit your drinking water brand personality.
         </p>
       </div>
 
@@ -130,15 +117,25 @@ export function ThemesShowcasePage() {
       <div className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-10 shadow-sm">
         <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-100 pb-6">
           <div>
-            <h2 className="text-xl font-bold text-slate-900">Interactive Live Preview</h2>
-            <p className="text-sm text-slate-500">Click any theme below to preview how your customer portal looks in real-time.</p>
+            <h2 className="text-xl font-bold text-slate-900">Interactive Full UI/UX Morph Preview</h2>
+            <p className="text-sm text-slate-500">
+              Notice how the navbar style, card radius, fonts, buttons, and layout change dramatically.
+            </p>
           </div>
-          <Link
-            to="/register"
-            className="inline-flex items-center gap-2 rounded-xl bg-sky-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-sky-700 transition"
-          >
-            Use This Theme in Your Trial <ArrowRight className="h-4 w-4" />
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link
+              to={`/customer/dashboard?theme=${selectedTheme.slug}`}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 transition"
+            >
+              Open in Portal <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+            <Link
+              to="/register"
+              className="inline-flex items-center gap-2 rounded-xl bg-sky-600 px-5 py-2.5 text-xs font-bold text-white hover:bg-sky-700 transition"
+            >
+              Start Free Trial
+            </Link>
+          </div>
         </div>
 
         {/* Theme tabs */}
@@ -149,9 +146,9 @@ export function ThemesShowcasePage() {
               <button
                 key={theme.slug}
                 onClick={() => setSelectedTheme(theme)}
-                className={`flex flex-col text-left p-3.5 rounded-2xl border transition ${
+                className={`flex flex-col text-left p-4 rounded-2xl border transition-all ${
                   isSelected
-                    ? "border-sky-600 bg-sky-50/50 ring-2 ring-sky-500/20"
+                    ? "border-sky-600 bg-sky-50/60 ring-2 ring-sky-500/20 shadow-xs"
                     : "border-slate-200 bg-white hover:border-slate-300"
                 }`}
               >
@@ -161,89 +158,249 @@ export function ThemesShowcasePage() {
                 </div>
                 <span className="font-bold text-sm text-slate-900 truncate">{theme.name}</span>
                 <span className="text-[11px] text-slate-500 mt-0.5 truncate">{theme.category}</span>
+                <span className="text-[10px] text-sky-600 font-semibold mt-1">
+                  {theme.slug === "aqua-professional" && "Sidebar Layout"}
+                  {theme.slug === "fresh-aqua" && "Floating Pill Nav"}
+                  {theme.slug === "aqua-express" && "Tactical Dock"}
+                  {theme.slug === "ocean-premium" && "Dark Marine Glass"}
+                  {theme.slug === "pure-luxury" && "Editorial Gold"}
+                </span>
               </button>
             );
           })}
         </div>
 
-        {/* Live Mock UI Container */}
-        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6 sm:p-8">
-          <div className="max-w-2xl mx-auto rounded-2xl bg-white shadow-lg border border-slate-100 overflow-hidden">
-            {/* Mock Header */}
-            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between" style={{ backgroundColor: selectedTheme.secondary }}>
-              <div className="flex items-center gap-2.5">
-                <div className="h-8 w-8 rounded-lg flex items-center justify-center text-white" style={{ backgroundColor: selectedTheme.primary }}>
-                  <Palette className="h-4 w-4" />
+        {/* Live Morphing Mock UI Container */}
+        <div className="rounded-3xl border border-slate-200 p-6 sm:p-10 transition-colors duration-300" style={{
+          backgroundColor: selectedTheme.slug === "ocean-premium" ? "#0b1329" : selectedTheme.slug === "pure-luxury" ? "#fbfaf8" : selectedTheme.slug === "fresh-aqua" ? "#f2fbf9" : selectedTheme.slug === "aqua-express" ? "#f1f5f9" : "#f8fafc"
+        }}>
+          {/* 1. FRESH AQUA MORPH */}
+          {selectedTheme.slug === "fresh-aqua" && (
+            <div className="max-w-2xl mx-auto space-y-6">
+              {/* Floating Island Navbar */}
+              <div className="rounded-3xl bg-white/90 backdrop-blur-md border border-teal-200/80 p-4 shadow-sm flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div className="h-9 w-9 rounded-2xl bg-teal-600 text-white flex items-center justify-center">
+                    <Droplets className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <div className="font-black text-sm text-teal-950">PureSpring Living</div>
+                    <div className="text-[10px] text-teal-600 font-bold">Wellness Residential Portal</div>
+                  </div>
                 </div>
-                <div>
-                  <div className="font-bold text-sm" style={{ color: selectedTheme.primary }}>Neelkanth Water Co.</div>
-                  <div className="text-[10px] text-slate-500 font-mono">Theme: {selectedTheme.name}</div>
+                <div className="flex items-center gap-2">
+                  <span className="rounded-full bg-teal-600 text-white px-3.5 py-1 text-xs font-bold">Home</span>
+                  <span className="rounded-full bg-teal-50 text-teal-800 px-3.5 py-1 text-xs font-medium">Deliveries</span>
                 </div>
               </div>
-              <span className="rounded-full px-2.5 py-1 text-xs font-semibold text-white shadow-xs" style={{ backgroundColor: selectedTheme.primary }}>
-                Active Subscriber
-              </span>
-            </div>
 
-            {/* Mock Customer Stats */}
-            <div className="p-6 space-y-6">
+              {/* Ultra-rounded organic cards */}
               <div className="grid grid-cols-3 gap-3">
-                <div className="rounded-xl p-4 border border-slate-100 bg-slate-50 text-center">
-                  <div className="text-xs text-slate-500">Water Delivered</div>
-                  <div className="text-2xl font-black mt-1" style={{ color: selectedTheme.primary }}>26 Jars</div>
-                  <div className="text-[10px] text-slate-400 mt-0.5">This Month</div>
+                <div className="rounded-3xl bg-white/90 border border-teal-100 p-5 shadow-sm text-center">
+                  <div className="text-xs font-semibold text-teal-700">Intake This Month</div>
+                  <div className="text-3xl font-black text-teal-600 mt-2">28 Jars</div>
+                  <div className="text-[10px] text-slate-400 mt-1">20L Clean Spring Cans</div>
                 </div>
-                <div className="rounded-xl p-4 border border-slate-100 bg-slate-50 text-center">
-                  <div className="text-xs text-slate-500">Empty Bottles</div>
-                  <div className="text-2xl font-black text-slate-800 mt-1">2</div>
-                  <div className="text-[10px] text-slate-400 mt-0.5">Holding balance</div>
+                <div className="rounded-3xl bg-white/90 border border-teal-100 p-5 shadow-sm text-center">
+                  <div className="text-xs font-semibold text-teal-700">Empty Bottles</div>
+                  <div className="text-3xl font-black text-slate-800 mt-2">2</div>
+                  <div className="text-[10px] text-slate-400 mt-1">Ready for pickup</div>
                 </div>
-                <div className="rounded-xl p-4 border border-slate-100 bg-slate-50 text-center">
-                  <div className="text-xs text-slate-500">Due Amount</div>
-                  <div className="text-2xl font-black text-emerald-600 mt-1">₹0.00</div>
-                  <div className="text-[10px] text-slate-400 mt-0.5">Paid in full</div>
-                </div>
-              </div>
-
-              {/* Mock Delivery List */}
-              <div>
-                <div className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Recent Route Records</div>
-                <div className="space-y-2 text-sm">
-                  <div className="flex items-center justify-between p-3 rounded-lg border border-slate-100 bg-white">
-                    <div>
-                      <div className="font-semibold text-slate-800">20L RO Can Delivered (Qty: 2)</div>
-                      <div className="text-xs text-slate-400">Today, 08:15 AM · Driver: Ramesh</div>
-                    </div>
-                    <span className="font-bold text-xs" style={{ color: selectedTheme.primary }}>2 Returned</span>
-                  </div>
-                  <div className="flex items-center justify-between p-3 rounded-lg border border-slate-100 bg-white">
-                    <div>
-                      <div className="font-semibold text-slate-800">20L RO Can Delivered (Qty: 2)</div>
-                      <div className="text-xs text-slate-400">Yesterday, 08:10 AM · Driver: Ramesh</div>
-                    </div>
-                    <span className="font-bold text-xs" style={{ color: selectedTheme.primary }}>2 Returned</span>
-                  </div>
+                <div className="rounded-3xl bg-white/90 border border-teal-100 p-5 shadow-sm text-center">
+                  <div className="text-xs font-semibold text-teal-700">Due Amount</div>
+                  <div className="text-3xl font-black text-emerald-600 mt-2">₹0.00</div>
+                  <div className="text-[10px] text-slate-400 mt-1">Auto-credited</div>
                 </div>
               </div>
 
-              {/* Action Button */}
-              <button
-                type="button"
-                className="w-full py-3 rounded-xl text-white font-bold text-sm shadow-md transition"
-                style={{ backgroundColor: selectedTheme.primary }}
-              >
-                Request Delivery Pause / Vacation
+              {/* Pill Button */}
+              <button type="button" className="w-full rounded-full bg-gradient-to-r from-teal-600 to-emerald-500 py-3.5 text-sm font-bold text-white shadow-lg shadow-teal-600/25">
+                Schedule Vacation / Pause Supply
               </button>
             </div>
-          </div>
+          )}
+
+          {/* 2. AQUA EXPRESS MORPH */}
+          {selectedTheme.slug === "aqua-express" && (
+            <div className="max-w-2xl mx-auto space-y-4 font-mono">
+              {/* Tactical Top Bar */}
+              <div className="bg-slate-900 border-b-2 border-blue-500 text-white p-3 flex items-center justify-between">
+                <div className="flex items-center gap-2 text-xs font-mono font-bold text-blue-400">
+                  <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                  RO-EXPRESS // ROUTE 04
+                </div>
+                <span className="bg-blue-600 text-white px-2 py-0.5 text-[10px] font-bold uppercase rounded-xs">
+                  DISPATCH ACTIVE
+                </span>
+              </div>
+
+              {/* Sharp square high-density cards */}
+              <div className="grid grid-cols-3 gap-2">
+                <div className="rounded-md border-2 border-slate-300 bg-white p-3.5">
+                  <div className="text-[10px] font-bold uppercase text-slate-500">MTH_SUPPLY</div>
+                  <div className="text-2xl font-black text-blue-600 mt-1">32 JARS</div>
+                </div>
+                <div className="rounded-md border-2 border-slate-300 bg-white p-3.5">
+                  <div className="text-[10px] font-bold uppercase text-slate-500">CAN_HOLDING</div>
+                  <div className="text-2xl font-black text-slate-900 mt-1">04 CANS</div>
+                </div>
+                <div className="rounded-md border-2 border-slate-300 bg-white p-3.5">
+                  <div className="text-[10px] font-bold uppercase text-slate-500">DUE_BALANCE</div>
+                  <div className="text-2xl font-black text-rose-600 mt-1">₹120.00</div>
+                </div>
+              </div>
+
+              {/* Sharp tactical button */}
+              <button type="button" className="w-full rounded-md bg-blue-600 py-2.5 text-xs font-mono font-black uppercase tracking-wider text-white hover:bg-blue-700">
+                [CLICK TO SUBMIT IMMEDIATE ROUTE PAUSE]
+              </button>
+            </div>
+          )}
+
+          {/* 3. OCEAN PREMIUM MORPH */}
+          {selectedTheme.slug === "ocean-premium" && (
+            <div className="max-w-2xl mx-auto space-y-6 text-white">
+              {/* Deep Oceanic Sapphire Glass Navbar */}
+              <div className="rounded-2xl border border-cyan-900/60 bg-slate-950/80 backdrop-blur-md p-4 flex items-center justify-between shadow-2xl">
+                <div className="flex items-center gap-2.5">
+                  <div className="h-8 w-8 rounded-lg bg-gradient-to-tr from-cyan-400 to-blue-600 flex items-center justify-center text-white shadow-lg shadow-cyan-500/25">
+                    <Droplets className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <div className="font-bold text-sm tracking-wide text-white">Glacier Blue Mineral</div>
+                    <div className="text-[10px] text-cyan-400 font-semibold">Premium Bottled Reserve</div>
+                  </div>
+                </div>
+                <span className="rounded-full border border-cyan-400/40 bg-cyan-950 px-3 py-0.5 text-xs font-bold text-cyan-300">
+                  Priority Client
+                </span>
+              </div>
+
+              {/* Dark Sapphire Glass Cards */}
+              <div className="grid grid-cols-3 gap-3">
+                <div className="rounded-2xl border border-slate-800 bg-slate-900/90 p-5 shadow-xl text-center">
+                  <div className="text-xs text-slate-400 font-medium">Delivered Supply</div>
+                  <div className="text-3xl font-black text-cyan-400 mt-2">40 Cans</div>
+                  <div className="text-[10px] text-slate-500 mt-1">Packaged Mineral</div>
+                </div>
+                <div className="rounded-2xl border border-slate-800 bg-slate-900/90 p-5 shadow-xl text-center">
+                  <div className="text-xs text-slate-400 font-medium">Deposit Bottles</div>
+                  <div className="text-3xl font-black text-white mt-2">3</div>
+                  <div className="text-[10px] text-slate-500 mt-1">Bespoke Cans</div>
+                </div>
+                <div className="rounded-2xl border border-slate-800 bg-slate-900/90 p-5 shadow-xl text-center">
+                  <div className="text-xs text-slate-400 font-medium">Account Status</div>
+                  <div className="text-3xl font-black text-emerald-400 mt-2">₹0.00</div>
+                  <div className="text-[10px] text-slate-500 mt-1">Auto-Settled</div>
+                </div>
+              </div>
+
+              {/* Glowing Cyan Gradient Button */}
+              <button type="button" className="w-full rounded-xl bg-gradient-to-r from-cyan-500 to-sky-600 py-3.5 text-sm font-bold text-white shadow-xl shadow-cyan-500/20">
+                Pause Supply / Adjust Schedule
+              </button>
+            </div>
+          )}
+
+          {/* 4. PURE LUXURY MORPH */}
+          {selectedTheme.slug === "pure-luxury" && (
+            <div className="max-w-2xl mx-auto space-y-6 font-serif">
+              {/* Obsidian Emerald & Gold Header */}
+              <div className="rounded-lg border border-amber-500/30 bg-emerald-950 p-4 text-amber-100 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="h-8 w-8 border border-amber-400/50 flex items-center justify-center text-amber-300">
+                    <Droplets className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <div className="font-serif font-bold text-base tracking-widest text-amber-100 uppercase">AURA ALKALINE</div>
+                    <div className="text-[9px] uppercase tracking-widest text-amber-300/70 font-sans">Glass Cask Concierge</div>
+                  </div>
+                </div>
+                <span className="border border-amber-500/50 bg-amber-950/40 px-3 py-0.5 text-[10px] font-sans uppercase tracking-widest text-amber-200">
+                  Private Member
+                </span>
+              </div>
+
+              {/* Luxury Gold-Border Cards */}
+              <div className="grid grid-cols-3 gap-3">
+                <div className="rounded-lg border border-amber-900/20 bg-white p-5 text-center shadow-xs">
+                  <div className="text-xs uppercase font-sans tracking-widest text-slate-400">Monthly Reserve</div>
+                  <div className="text-3xl font-serif font-bold text-emerald-950 mt-2">24 Jars</div>
+                  <div className="text-[10px] font-sans text-amber-800/80 mt-1">Alkaline 8.5 pH</div>
+                </div>
+                <div className="rounded-lg border border-amber-900/20 bg-white p-5 text-center shadow-xs">
+                  <div className="text-xs uppercase font-sans tracking-widest text-slate-400">Glass Vessels</div>
+                  <div className="text-3xl font-serif font-bold text-slate-800 mt-2">2</div>
+                  <div className="text-[10px] font-sans text-slate-400 mt-1">Holding Balance</div>
+                </div>
+                <div className="rounded-lg border border-amber-900/20 bg-white p-5 text-center shadow-xs">
+                  <div className="text-xs uppercase font-sans tracking-widest text-slate-400">Ledger Balance</div>
+                  <div className="text-3xl font-serif font-bold text-amber-700 mt-2">₹0.00</div>
+                  <div className="text-[10px] font-sans text-emerald-700 mt-1">Prestige Tier</div>
+                </div>
+              </div>
+
+              {/* Bespoke Luxury Button */}
+              <button type="button" className="w-full rounded-none border border-amber-600 bg-emerald-950 py-3 text-xs font-serif font-bold uppercase tracking-widest text-amber-200 hover:bg-emerald-900">
+                Submit Concierge Supply Pause
+              </button>
+            </div>
+          )}
+
+          {/* 5. AQUA PROFESSIONAL (DEFAULT CORPORATE) */}
+          {selectedTheme.slug === "aqua-professional" && (
+            <div className="max-w-2xl mx-auto space-y-5">
+              {/* Corporate Header */}
+              <div className="rounded-xl border border-slate-200 bg-white p-4 flex items-center justify-between shadow-xs">
+                <div className="flex items-center gap-3">
+                  <div className="h-8 w-8 rounded-lg bg-sky-600 text-white flex items-center justify-center">
+                    <Droplets className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <div className="font-bold text-sm text-slate-900">Neelkanth Commercial Supply</div>
+                    <div className="text-xs text-slate-500">Corporate B2B Account</div>
+                  </div>
+                </div>
+                <span className="rounded-md bg-sky-50 border border-sky-200 px-2.5 py-0.5 text-xs font-semibold text-sky-700">
+                  Verified Enterprise
+                </span>
+              </div>
+
+              {/* Clean Structured Data Cards */}
+              <div className="grid grid-cols-3 gap-3">
+                <div className="rounded-xl border border-slate-200 bg-white p-5 text-center shadow-xs">
+                  <div className="text-xs font-semibold text-slate-500">Delivered Supply</div>
+                  <div className="text-3xl font-bold text-sky-700 mt-2">45 Jars</div>
+                  <div className="text-[10px] text-slate-400 mt-1">Office Floor 4</div>
+                </div>
+                <div className="rounded-xl border border-slate-200 bg-white p-5 text-center shadow-xs">
+                  <div className="text-xs font-semibold text-slate-500">Empty Bottles</div>
+                  <div className="text-3xl font-bold text-slate-800 mt-2">5</div>
+                  <div className="text-[10px] text-slate-400 mt-1">Cafeteria Hub</div>
+                </div>
+                <div className="rounded-xl border border-slate-200 bg-white p-5 text-center shadow-xs">
+                  <div className="text-xs font-semibold text-slate-500">Current Ledger</div>
+                  <div className="text-3xl font-bold text-emerald-600 mt-2">₹0.00</div>
+                  <div className="text-[10px] text-slate-400 mt-1">Net 30 Invoicing</div>
+                </div>
+              </div>
+
+              {/* Corporate Button */}
+              <button type="button" className="w-full rounded-lg bg-sky-600 py-3 text-sm font-semibold text-white shadow-xs hover:bg-sky-700">
+                Submit Holiday / Delivery Adjustment
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
       {/* Grid of all themes */}
       <div>
         <div className="text-center max-w-2xl mx-auto mb-10">
-          <h2 className="text-2xl font-black text-slate-900">Explore All 5 Built-in Themes</h2>
-          <p className="mt-2 text-sm text-slate-600">Every JalPilot company plan includes all 5 themes. Switch between them anytime in your Admin Settings.</p>
+          <h2 className="text-2xl font-black text-slate-900">5 Distinct UI/UX Archetypes</h2>
+          <p className="mt-2 text-sm text-slate-600">
+            Each theme features its own navigation bar type, card curvature, button design, and font hierarchy.
+          </p>
         </div>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -263,16 +420,24 @@ export function ThemesShowcasePage() {
                   <div className="text-xs font-medium text-slate-700 mt-1">{theme.bestFor}</div>
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={() => {
-                  setSelectedTheme(theme);
-                  window.scrollTo({ top: 350, behavior: "smooth" });
-                }}
-                className="mt-6 w-full py-2 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
-              >
-                Preview Live Above ↑
-              </button>
+              <div className="mt-6 flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedTheme(theme);
+                    window.scrollTo({ top: 350, behavior: "smooth" });
+                  }}
+                  className="flex-1 py-2 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
+                >
+                  Preview Morph ↑
+                </button>
+                <Link
+                  to={`/customer/dashboard?theme=${theme.slug}`}
+                  className="px-3 py-2 rounded-lg bg-sky-50 text-sky-700 hover:bg-sky-100 text-xs font-bold"
+                >
+                  Live Portal
+                </Link>
+              </div>
             </div>
           ))}
         </div>
