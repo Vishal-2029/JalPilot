@@ -139,6 +139,7 @@ func main() {
 	delivH.RegisterCustomerRoutes(cust)
 	payH.RegisterCustomerRoutes(cust)
 	leaveH.RegisterCustomerRoutes(cust)
+	themeH.RegisterCustomerRoutes(cust)
 
 	go func() {
 		log.Info("starting jalpilot-be api", "port", cfg.AppPort)

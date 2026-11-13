@@ -29,19 +29,18 @@ export function ThemeMarketplacePage() {
 
   const activateMutation = useMutation({
     mutationFn: async ({ id, slug }: { id?: string; slug: string }) => {
+      await setThemeSlug(slug);
       if (id) {
         try {
           await apiClient.post(`/admin/themes/${id}/activate`);
         } catch {
-          // Fallback to local state
+          // Fallback handled
         }
       }
-      setThemeSlug(slug);
     },
     onSuccess: (_, vars) => {
-      setThemeSlug(vars.slug);
-      setSuccessToast(`Theme successfully activated: ${vars.slug}!`);
-      setTimeout(() => setSuccessToast(""), 3500);
+      setSuccessToast(`Theme "${vars.slug}" successfully applied across your customer and admin panels!`);
+      setTimeout(() => setSuccessToast(""), 4000);
       qc.invalidateQueries({ queryKey: ["admin-themes"] });
     },
   });

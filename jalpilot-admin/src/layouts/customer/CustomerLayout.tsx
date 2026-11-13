@@ -53,7 +53,7 @@ export function CustomerLayout() {
               <button
                 key={t.slug}
                 onClick={() => {
-                  setThemeSlug(t.slug);
+                  void setThemeSlug(t.slug);
                   setThemeSwitcherOpen(false);
                 }}
                 className={`w-full flex items-center justify-between p-2 rounded-xl text-xs text-left transition ${

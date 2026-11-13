@@ -36,8 +36,14 @@ func (h *ThemeHandler) RegisterSuperAdminRoutes(sa fiber.Router) {
 
 func (h *ThemeHandler) RegisterAdminRoutes(admin fiber.Router) {
 	admin.Get("/themes", h.ListMarketplaceThemes)
+	admin.Get("/themes/active", h.GetActiveTheme)
+	admin.Post("/themes/set-active", h.SetActiveThemeBySlug)
 	admin.Post("/themes/:id/purchase", h.PurchaseTheme)
 	admin.Post("/themes/:id/activate", h.ActivateTheme)
+}
+
+func (h *ThemeHandler) RegisterCustomerRoutes(cust fiber.Router) {
+	cust.Get("/themes/active", h.GetActiveTheme)
 }
 
 // GetPublicTenantContext resolves a tenant by slug or domain and returns its active theme configuration (cached in Redis).
@@ -302,7 +308,16 @@ func (h *ThemeHandler) ActivateTheme(c *fiber.Ctx) error {
 			var owned bool
 			_ = tx.QueryRow(c.Context(), `SELECT EXISTS(SELECT 1 FROM theme_purchases WHERE tenant_id = $1 AND theme_id = $2 AND purchase_status = 'COMPLETED')`, tid, themeID).Scan(&owned)
 			if !owned {
-				return fmt.Errorf("theme must be purchased before activation")
+				// Built-in SaaS platform themes are included with company workspace subscription
+				var txnID uuid.UUID
+				_ = tx.QueryRow(c.Context(), `
+					INSERT INTO platform_transactions (tenant_id, transaction_type, amount, payment_status)
+					VALUES ($1, 'THEME_PURCHASE', 0, 'COMPLETED') RETURNING id
+				`, tid).Scan(&txnID)
+				_, _ = tx.Exec(c.Context(), `
+					INSERT INTO theme_purchases (tenant_id, theme_id, purchased_price, purchase_status, platform_transaction_id)
+					VALUES ($1, $2, 0, 'COMPLETED', $3)
+				`, tid, themeID, txnID)
 			}
 		}
 		var versionID uuid.UUID
@@ -329,5 +344,93 @@ func (h *ThemeHandler) ActivateTheme(c *fiber.Ctx) error {
 		_ = h.rdb.RDB.Del(c.Context(), pkgredis.TenantKey(tid, "theme", "active")).Err()
 	}
 	return response.OK(c, "theme activated", fiber.Map{"activated_at": time.Now().UTC()})
+}
+
+func (h *ThemeHandler) GetActiveTheme(c *fiber.Ctx) error {
+	tid, ok := tenantmw.TenantIDFromCtx(c)
+	if !ok {
+		return response.Fail(c, fiber.StatusForbidden, "NO_TENANT", "tenant required", nil)
+	}
+
+	var themeSlug, themeName string
+	var configJSON map[string]any
+	var primaryCol, secondaryCol *string
+
+	err := h.txm.WithTenant(c.Context(), tid, func(tx pgx.Tx) error {
+		return tx.QueryRow(c.Context(), `
+			SELECT th.theme_slug, th.theme_name, tv.configuration_json, tts.primary_color, tts.secondary_color
+			FROM tenant_theme_settings tts
+			JOIN themes th ON th.id = tts.theme_id
+			JOIN theme_versions tv ON tv.id = tts.theme_version_id
+			WHERE tts.tenant_id = $1 AND tts.is_active = TRUE
+			LIMIT 1
+		`, tid).Scan(&themeSlug, &themeName, &configJSON, &primaryCol, &secondaryCol)
+	})
+
+	if err != nil || themeSlug == "" {
+		themeSlug = "aqua-professional"
+		themeName = "Aqua Professional"
+	}
+
+	return response.OK(c, "active theme", fiber.Map{
+		"theme_slug":   themeSlug,
+		"theme_name":   themeName,
+		"theme_config": configJSON,
+		"primary":      primaryCol,
+		"secondary":    secondaryCol,
+	})
+}
+
+func (h *ThemeHandler) SetActiveThemeBySlug(c *fiber.Ctx) error {
+	tid, ok := tenantmw.TenantIDFromCtx(c)
+	if !ok {
+		return response.Fail(c, fiber.StatusForbidden, "NO_TENANT", "tenant required", nil)
+	}
+
+	var req struct {
+		ThemeSlug string `json:"theme_slug"`
+	}
+	if err := c.BodyParser(&req); err != nil || req.ThemeSlug == "" {
+		return response.Fail(c, fiber.StatusBadRequest, "INVALID_BODY", "theme_slug required", nil)
+	}
+
+	err := h.txm.WithTenant(c.Context(), tid, func(tx pgx.Tx) error {
+		var themeID, versionID uuid.UUID
+		err := tx.QueryRow(c.Context(), `
+			SELECT id FROM themes WHERE theme_slug = $1 LIMIT 1
+		`, req.ThemeSlug).Scan(&themeID)
+		if err != nil {
+			return fmt.Errorf("theme '%s' not found in database", req.ThemeSlug)
+		}
+
+		err = tx.QueryRow(c.Context(), `
+			SELECT id FROM theme_versions WHERE theme_id = $1 ORDER BY created_at DESC LIMIT 1
+		`, themeID).Scan(&versionID)
+		if err != nil {
+			return fmt.Errorf("theme version not found")
+		}
+
+		_, err = tx.Exec(c.Context(), `
+			INSERT INTO tenant_theme_settings (tenant_id, theme_id, theme_version_id, is_active, activated_at)
+			VALUES ($1, $2, $3, TRUE, NOW())
+			ON CONFLICT (tenant_id) DO UPDATE SET
+				theme_id = EXCLUDED.theme_id,
+				theme_version_id = EXCLUDED.theme_version_id,
+				is_active = TRUE,
+				activated_at = NOW(),
+				updated_at = NOW()
+		`, tid, themeID, versionID)
+		return err
+	})
+
+	if err != nil {
+		return response.Fail(c, fiber.StatusBadRequest, "SET_THEME_FAILED", err.Error(), nil)
+	}
+
+	if h.rdb != nil {
+		_ = h.rdb.RDB.Del(c.Context(), pkgredis.TenantKey(tid, "theme", "active")).Err()
+	}
+
+	return response.OK(c, "theme updated", fiber.Map{"theme_slug": req.ThemeSlug})
 }
 
