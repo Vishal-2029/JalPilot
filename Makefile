@@ -1,8 +1,11 @@
-.PHONY: run db-up db-down run-be run-worker run-admin run-customer build test
+.PHONY: run run-apps db-up db-down run-be run-worker run-admin run-customer build test
 
 # Start PostgreSQL + Redis and run all JalPilot services (API, Worker, Admin UI, Customer UI)
-run: db-up
-	@echo "Starting all JalPilot services..."
+run: db-up run-apps
+
+# Run only the application processes (assumes PostgreSQL and Redis are already running)
+run-apps:
+	@echo "Starting all JalPilot app services..."
 	@powershell -NoProfile -ExecutionPolicy Bypass -Command "\
 		$$root = (Get-Location).Path; \
 		$$jobs = @(); \
@@ -23,7 +26,16 @@ run: db-up
 		}"
 
 db-up:
-	docker compose -f jalpilot-be/docker-compose.yml up -d postgres redis
+	@powershell -NoProfile -ExecutionPolicy Bypass -Command "\
+		docker info > $$null 2>&1; \
+		if ($$LASTEXITCODE -ne 0) { \
+			Write-Host 'ERROR: Docker Desktop is not currently running.' -ForegroundColor Red; \
+			Write-Host 'Please open Docker Desktop from your Windows Start Menu (or launch it) and wait until the Docker engine starts.' -ForegroundColor Yellow; \
+			Write-Host 'Once Docker Desktop is ready, run: make run' -ForegroundColor Cyan; \
+			Write-Host 'If you are running PostgreSQL & Redis natively without Docker, run: make run-apps' -ForegroundColor Gray; \
+			exit 1; \
+		}; \
+		docker compose -f jalpilot-be/docker-compose.yml up -d postgres redis"
 
 db-down:
 	docker compose -f jalpilot-be/docker-compose.yml down
@@ -47,4 +59,3 @@ build:
 
 test:
 	cd jalpilot-be && go test -v ./...
-
