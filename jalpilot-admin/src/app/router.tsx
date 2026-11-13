@@ -2,12 +2,15 @@ import { createBrowserRouter, Navigate } from "react-router-dom";
 import { PublicLayout } from "@/layouts/public/PublicLayout";
 import { SuperAdminLayout } from "@/layouts/super-admin/SuperAdminLayout";
 import { CompanyAdminLayout } from "@/layouts/company-admin/CompanyAdminLayout";
+import { CustomerLayout } from "@/layouts/customer/CustomerLayout";
+import { DeliveryStaffLayout } from "@/layouts/delivery-staff/DeliveryStaffLayout";
 import { AuthGuard } from "@/guards/AuthGuard";
 import { RoleGuard } from "@/guards/RoleGuard";
 import { HomePage } from "@/modules/public-website/pages/HomePage";
 import { FeaturesPage, PricingPage, ThemesShowcasePage, StaticInfoPage } from "@/modules/public-website/pages/MarketingPages";
 import { LoginPage } from "@/modules/authentication/pages/LoginPage";
 import { RegisterCompanyPage } from "@/modules/authentication/pages/RegisterCompanyPage";
+import { AcceptInvitationPage } from "@/modules/authentication/invitation/AcceptInvitationPage";
 import { SuperAdminDashboardPage } from "@/modules/super-admin/dashboard/SuperAdminDashboardPage";
 import { CompaniesPage } from "@/modules/super-admin/companies/CompaniesPage";
 import { ThemesCataloguePage } from "@/modules/super-admin/themes/ThemesCataloguePage";
@@ -23,6 +26,14 @@ import { StaffPage } from "@/modules/company-admin/staff/StaffPage";
 import { ReportsPage } from "@/modules/company-admin/reports/ReportsPage";
 import { ThemeMarketplacePage } from "@/modules/company-admin/theme-marketplace/ThemeMarketplacePage";
 import { SettingsPage } from "@/modules/company-admin/settings/SettingsPage";
+import { CustomerDashboardPage } from "@/modules/customer/dashboard/CustomerDashboardPage";
+import {
+  CustomerDeliveriesPage,
+  CustomerExpensesPage,
+  CustomerPaymentsPage,
+  CustomerLeavePage,
+} from "@/modules/customer/CustomerPortalPages";
+import { StaffDeliveriesPage } from "@/modules/delivery-staff/StaffDeliveriesPage";
 
 export const router = createBrowserRouter([
   {
@@ -38,6 +49,7 @@ export const router = createBrowserRouter([
       { path: "/privacy", element: <StaticInfoPage title="Privacy Policy" body="All tenant customer records and financial ledgers are strictly isolated using PostgreSQL Row-Level Security." /> },
       { path: "/login", element: <LoginPage /> },
       { path: "/register", element: <RegisterCompanyPage /> },
+      { path: "/accept-invitation", element: <AcceptInvitationPage /> },
     ],
   },
   {
@@ -78,5 +90,32 @@ export const router = createBrowserRouter([
       { path: "settings", element: <SettingsPage /> },
     ],
   },
+  {
+    path: "/customer",
+    element: (
+      <AuthGuard>
+        <CustomerLayout />
+      </AuthGuard>
+    ),
+    children: [
+      { index: true, element: <Navigate to="/customer/dashboard" replace /> },
+      { path: "dashboard", element: <CustomerDashboardPage /> },
+      { path: "deliveries", element: <CustomerDeliveriesPage /> },
+      { path: "expenses", element: <CustomerExpensesPage /> },
+      { path: "payments", element: <CustomerPaymentsPage /> },
+      { path: "leave-requests", element: <CustomerLeavePage /> },
+    ],
+  },
+  {
+    path: "/staff",
+    element: (
+      <AuthGuard>
+        <DeliveryStaffLayout />
+      </AuthGuard>
+    ),
+    children: [
+      { index: true, element: <Navigate to="/staff/deliveries" replace /> },
+      { path: "deliveries", element: <StaffDeliveriesPage /> },
+    ],
+  },
 ]);
-

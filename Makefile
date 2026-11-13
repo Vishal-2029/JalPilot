@@ -1,6 +1,6 @@
 .PHONY: run run-apps db-up db-down db-reset run-be run-worker run-admin run-customer build test
 
-# Start PostgreSQL + Redis and run all JalPilot services (API, Worker, Admin UI, Customer UI)
+# Start PostgreSQL + Redis and run all JalPilot services (API, Worker, Unified Web UI on :5173)
 run: db-up run-apps
 
 # Run only the application processes (assumes PostgreSQL and Redis are already running)
@@ -12,8 +12,9 @@ run-apps:
 		$$jobs += Start-Job -Name 'jalpilot-api' -ScriptBlock { param($$d) Set-Location $$d; go run ./cmd/api } -ArgumentList (Join-Path $$root 'jalpilot-be'); \
 		$$jobs += Start-Job -Name 'jalpilot-worker' -ScriptBlock { param($$d) Set-Location $$d; go run ./cmd/worker } -ArgumentList (Join-Path $$root 'jalpilot-be'); \
 		$$jobs += Start-Job -Name 'jalpilot-admin' -ScriptBlock { param($$d) Set-Location $$d; npm run dev } -ArgumentList (Join-Path $$root 'jalpilot-admin'); \
-		$$jobs += Start-Job -Name 'jalpilot-customer' -ScriptBlock { param($$d) Set-Location $$d; npm run dev } -ArgumentList (Join-Path $$root 'jalpilot-customer'); \
-		Write-Host 'Services launched: API (:8080), Worker, Admin (:5173), Customer (:5174). Press Ctrl+C to stop.' -ForegroundColor Cyan; \
+		Write-Host 'JalPilot is live! Open http://localhost:5173 in your browser.' -ForegroundColor Green; \
+		Write-Host 'Unified single port :5173 covers Super Admin, Company Admin, Customer Portal, and Delivery Staff.' -ForegroundColor Cyan; \
+		Write-Host 'Backend API is proxied on :5173/api and running directly on :8080. Press Ctrl+C to stop.' -ForegroundColor Gray; \
 		try { \
 			while ($$true) { \
 				foreach ($$j in $$jobs) { Receive-Job -Job $$j }; \

@@ -62,19 +62,16 @@ JalPilot/
 │   ├── api/openapi.yaml        # OpenAPI 3.1 specification
 │   └── tests/                  # Unit & tenant-isolation test suites
 │
-├── jalpilot-admin/             # Public Website, Super Admin & Company Admin SPA (:5173)
+├── jalpilot-admin/             # Unified Web Portal: Public Website, Super Admin, Company Admin, Customer & Staff (:5173)
 │   └── src/
-│       ├── app/                # Router & providers
-│       ├── layouts/            # PublicLayout, SuperAdminLayout, CompanyAdminLayout
-│       ├── modules/            # public-website, authentication, super-admin, company-admin
+│       ├── app/                # Router & providers (TenantThemeProvider, AuthProvider)
+│       ├── layouts/            # PublicLayout, SuperAdminLayout, CompanyAdminLayout, CustomerLayout, DeliveryStaffLayout
+│       ├── modules/            # public-website, authentication, super-admin, company-admin, customer, delivery-staff
 │       ├── guards/             # AuthGuard & RoleGuard
-│       └── services/           # Axios client with HTTP-only cookies & CSRF header
+│       ├── themes/             # Dynamic Theme Engine (5 tenant branding themes)
+│       └── services/           # Axios client with Vite reverse proxy & CSRF handling
 │
-└── jalpilot-customer/          # Customer Portal & Delivery Staff SPA (:5174)
-    └── src/
-        ├── layouts/            # CustomerLayout & DeliveryStaffLayout
-        ├── modules/            # authentication, customer, delivery-staff
-        └── themes/             # Configuration-driven dynamic Theme Engine (5 themes)
+└── jalpilot-customer/          # Standalone Customer client (optional)
 ```
 
 ---
@@ -134,10 +131,9 @@ From the root `JalPilot/` directory:
 make run
 ```
 This starts PostgreSQL & Redis via Docker Compose and launches:
-- **Backend API**: `http://localhost:8080`
-- **Background Worker**: Running alongside API
-- **Admin & Public Website**: `http://localhost:5173`
-- **Customer & Staff Portal**: `http://localhost:5174`
+- **Unified Web Portal**: `http://localhost:5173` (All roles: Public Site, Super Admin, Company Admin, Customer Portal, Delivery Staff)
+- **Backend API**: `http://localhost:8080` (Also proxied transparently via `http://localhost:5173/api`)
+- **Background Worker**: Asynchronous queue worker
 
 ### 3. Build & Test Commands
 ```bash
