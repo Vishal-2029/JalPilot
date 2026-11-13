@@ -7,7 +7,15 @@ import { DeliveryStaffLayout } from "@/layouts/delivery-staff/DeliveryStaffLayou
 import { AuthGuard } from "@/guards/AuthGuard";
 import { RoleGuard } from "@/guards/RoleGuard";
 import { HomePage } from "@/modules/public-website/pages/HomePage";
-import { FeaturesPage, PricingPage, ThemesShowcasePage, StaticInfoPage } from "@/modules/public-website/pages/MarketingPages";
+import {
+  FeaturesPage,
+  PricingPage,
+  ThemesShowcasePage,
+  AboutPage,
+  ContactPage,
+  TermsPage,
+  PrivacyPage,
+} from "@/modules/public-website/pages/MarketingPages";
 import { LoginPage } from "@/modules/authentication/pages/LoginPage";
 import { RegisterCompanyPage } from "@/modules/authentication/pages/RegisterCompanyPage";
 import { AcceptInvitationPage } from "@/modules/authentication/invitation/AcceptInvitationPage";
@@ -40,13 +48,13 @@ export const router = createBrowserRouter([
     element: <PublicLayout />,
     children: [
       { path: "/", element: <HomePage /> },
-      { path: "/features", element: <FeaturesPage /> },
-      { path: "/pricing", element: <PricingPage /> },
       { path: "/themes", element: <ThemesShowcasePage /> },
-      { path: "/about", element: <StaticInfoPage title="About JalPilot" body="JalPilot empowers water jar & water supply businesses to replace manual paper registers with an auditable, multi-tenant cloud platform." /> },
-      { path: "/contact", element: <StaticInfoPage title="Contact Us" body="Reach our team at support@jalpilot.com for enterprise onboarding and custom domain setup." /> },
-      { path: "/terms", element: <StaticInfoPage title="Terms & Conditions" body="Standard JalPilot SaaS terms of service apply to all registered tenant workspaces." /> },
-      { path: "/privacy", element: <StaticInfoPage title="Privacy Policy" body="All tenant customer records and financial ledgers are strictly isolated using PostgreSQL Row-Level Security." /> },
+      { path: "/pricing", element: <PricingPage /> },
+      { path: "/about", element: <AboutPage /> },
+      { path: "/contact", element: <ContactPage /> },
+      { path: "/features", element: <FeaturesPage /> },
+      { path: "/terms", element: <TermsPage /> },
+      { path: "/privacy", element: <PrivacyPage /> },
       { path: "/login", element: <LoginPage /> },
       { path: "/register", element: <RegisterCompanyPage /> },
       { path: "/accept-invitation", element: <AcceptInvitationPage /> },
