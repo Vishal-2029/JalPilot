@@ -55,6 +55,10 @@ func main() {
 	}
 	defer pool.Close()
 
+	if err := database.AutoMigrate(ctx, pool, log); err != nil {
+		log.Warn("database automigrate warning", "error", err)
+	}
+
 	rdb, err := pkgredis.NewClient(ctx, cfg)
 	if err != nil {
 		log.Error("failed to connect to redis", "error", err)

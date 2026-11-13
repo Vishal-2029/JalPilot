@@ -74,4 +74,3 @@ func TestValidator(t *testing.T) {
 		t.Fatalf("expected no validation error, got %+v", errs)
 	}
 }
-

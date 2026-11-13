@@ -46,3 +46,27 @@ INSERT INTO theme_versions (theme_id, version, configuration_json, published_at)
 ('11111111-1111-1111-1111-111111111105', '1.0.0', '{"primary":"#1e293b","secondary":"#f1f5f9","accent":"#d97706","surface":"#ffffff","layout":"topnav","radius":"0.75rem","font":"Outfit"}'::jsonb, NOW())
 ON CONFLICT (theme_id, version) DO NOTHING;
 
+-- Default Platform Super Admin User (admin@jalpilot.com / Admin@123)
+INSERT INTO users (
+    id, full_name, email, normalized_email, phone, normalized_phone, password_hash, account_status, email_verified_at, phone_verified_at
+)
+SELECT
+    '00000000-0000-0000-0000-000000000001',
+    'JalPilot Super Admin',
+    'admin@jalpilot.com',
+    'admin@jalpilot.com',
+    '+919999999999',
+    '+919999999999',
+    '$argon2id$v=19$m=65536,t=2,p=4$DT9B+bfQxfaMcqfoGtimzA$KVbGOAX9DVNrxHP5gFif4i7HM8i4ndFF5tbajgQMrJc',
+    'ACTIVE',
+    NOW(),
+    NOW()
+WHERE NOT EXISTS (
+    SELECT 1 FROM users WHERE normalized_email = 'admin@jalpilot.com'
+);
+
+INSERT INTO platform_user_roles (user_id, role_key)
+SELECT '00000000-0000-0000-0000-000000000001', 'SUPER_ADMIN'
+WHERE NOT EXISTS (
+    SELECT 1 FROM platform_user_roles WHERE user_id = '00000000-0000-0000-0000-000000000001' AND role_key = 'SUPER_ADMIN'
+);
