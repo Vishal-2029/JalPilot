@@ -22,7 +22,19 @@ func RegisterGlobal(app *fiber.App, cfg *configs.Config) {
 	app.Use(compress.New(compress.Config{Level: compress.LevelBestSpeed}))
 
 	app.Use(cors.New(cors.Config{
-		AllowOrigins:     cfg.CORSAllowedOrigins,
+		AllowOriginsFunc: func(origin string) bool {
+			if cfg.AppEnv == "development" {
+				if strings.HasPrefix(origin, "http://localhost:") || strings.HasPrefix(origin, "http://127.0.0.1:") {
+					return true
+				}
+			}
+			for _, o := range strings.Split(cfg.CORSAllowedOrigins, ",") {
+				if strings.TrimSpace(o) == origin {
+					return true
+				}
+			}
+			return false
+		},
 		AllowCredentials: true,
 		AllowHeaders:     "Origin, Content-Type, Accept, Authorization, X-CSRF-Token",
 		AllowMethods:     "GET, POST, PUT, PATCH, DELETE, OPTIONS",
@@ -44,8 +56,10 @@ func CSRFProtect() fiber.Handler {
 		if method == fiber.MethodGet || method == fiber.MethodHead || method == fiber.MethodOptions {
 			return c.Next()
 		}
-		// Webhooks are authenticated via provider HMAC signatures, not CSRF cookies.
-		if strings.HasPrefix(c.Path(), "/api/v1/webhooks/") {
+		// Public, auth (login/register/refresh), and webhook endpoints do not require pre-existing CSRF session cookies
+		if strings.HasPrefix(c.Path(), "/api/v1/auth/") ||
+			strings.HasPrefix(c.Path(), "/api/v1/public/") ||
+			strings.HasPrefix(c.Path(), "/api/v1/webhooks/") {
 			return c.Next()
 		}
 

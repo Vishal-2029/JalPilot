@@ -62,7 +62,7 @@ func AutoMigrate(ctx context.Context, pool *pgxpool.Pool, log *slog.Logger) erro
 }
 
 func findProjectRoot() string {
-	candidates := []string{".", "jalpilot-be", ".."}
+	candidates := []string{".", "jalpilot-be", "..", "../.."}
 	for _, c := range candidates {
 		if _, err := os.Stat(filepath.Join(c, "migrations/seeds/001_initial_seed.sql")); err == nil {
 			return c
@@ -70,3 +70,4 @@ func findProjectRoot() string {
 	}
 	return "."
 }
+

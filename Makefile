@@ -1,4 +1,4 @@
-.PHONY: run run-apps db-up db-down run-be run-worker run-admin run-customer build test
+.PHONY: run run-apps db-up db-down db-reset run-be run-worker run-admin run-customer build test
 
 # Start PostgreSQL + Redis and run all JalPilot services (API, Worker, Admin UI, Customer UI)
 run: db-up run-apps
@@ -39,6 +39,10 @@ db-up:
 
 db-down:
 	docker compose -f jalpilot-be/docker-compose.yml down
+
+db-reset:
+	docker compose -f jalpilot-be/docker-compose.yml down -v
+	docker compose -f jalpilot-be/docker-compose.yml up -d postgres redis
 
 run-be:
 	cd jalpilot-be && go run ./cmd/api
